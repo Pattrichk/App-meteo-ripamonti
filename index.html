@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>App Meteo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/style/style.css" />
+</head>
+<body>
+
+  <div class="app-container">
+    <h1 class="app-title">Meteo in tempo reale</h1>
+
+    <form id="meteoForm" class="search-form">
+      <input type="text" id="cittaInput" placeholder="Inserisci città..." required />
+      <button type="submit">🔍 Cerca</button>
+    </form>
+
+    <div class="msg" id="erroreMsg"></div>
+
+    <div class="card-meteo" id="meteoCard" style="display: none;">
+      <h2 class="card-meteo-title" id="meteoCitta">Milano</h2>
+
+      <div class="weather-main">
+        <img id="meteoIcona" src="" alt="Icona meteo" />
+        <p class="card-meteo-temp" id="meteoTemp">15°C</p>
+      </div>
+
+      <div class="weather-details">
+        <p><strong>Descrizione:</strong> <span id="meteoDescrizione">Sereno</span></p>
+        <p><strong>Umidità:</strong> <span id="meteoUmidita">60%</span></p>
+        <p><strong>Vento:</strong> <span id="meteoVento">5 km/h</span></p>
+      </div>
+    </div>
+  </div>
+  
+  
+
+  <script>
+    const API_KEY = 'e056944b3d73480ce0fc8ab5901a2f98';
+
+    document.getElementById("meteoForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const citta = document.getElementById("cittaInput").value.trim();
+      const erroreMsg = document.getElementById("erroreMsg");
+      const meteoCard = document.getElementById("meteoCard");
+
+      if (!citta) return;
+
+      erroreMsg.textContent = "⏳ Caricamento...";
+      meteoCard.style.display = "none";
+
+      try {
+        const res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(citta)}&appid=${API_KEY}&units=metric&lang=it`
+        );
+
+        if (!res.ok) throw new Error("Città non trovata");
+
+        const data = await res.json();
+
+        document.getElementById("meteoCitta").textContent = data.name;
+        document.getElementById("meteoTemp").textContent = `${Math.round(data.main.temp)}°C`;
+        document.getElementById("meteoIcona").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        document.getElementById("meteoIcona").alt = data.weather[0].description;
+        document.getElementById("meteoDescrizione").textContent = data.weather[0].description;
+        document.getElementById("meteoUmidita").textContent = `${data.main.humidity}%`;
+        document.getElementById("meteoVento").textContent = `${data.wind.speed} km/h`;
+
+        erroreMsg.textContent = "";
+        meteoCard.style.display = "block";
+      } catch (error) {
+        erroreMsg.textContent = "❌ Errore: " + error.message;
+      }
+    });
+    
+           
+  </script>
+
+</body>
+</html>
